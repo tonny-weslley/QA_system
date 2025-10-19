@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Creepster&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-halloween-black text-white font-inter;
+    margin: 0;
+    min-height: 100vh;
+  }
+}
+
+@layer utilities {
+  .text-halloween-gradient {
+    background: linear-gradient(to right, #6B21A8, #F97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
