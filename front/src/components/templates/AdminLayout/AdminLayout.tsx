@@ -15,7 +15,7 @@ export interface AdminLayoutProps {
 export const AdminLayout = ({
   children,
   username,
-  onQuestionsClick,
+  onQuestionsClick: _onQuestionsClick,
   onScoreboardClick,
   onLogout,
   className,

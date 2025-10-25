@@ -246,7 +246,10 @@ export const AdminQuestionsPage = () => {
                       editingQuestion
                         ? {
                             statement: editingQuestion.statement,
-                            options: editingQuestion.options,
+                            options: editingQuestion.options.map(opt => ({
+                              ...opt,
+                              isCorrect: opt.isCorrect ?? false
+                            })),
                             difficulty: editingQuestion.difficulty,
                           }
                         : undefined

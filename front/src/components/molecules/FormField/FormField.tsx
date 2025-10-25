@@ -1,7 +1,6 @@
 import { forwardRef } from 'react';
 import { Input } from '../../atoms/Input';
 import type { InputProps } from '../../atoms/Input';
-import { cn } from '../../../lib/utils';
 
 export interface FormFieldProps extends InputProps {
   label: string;

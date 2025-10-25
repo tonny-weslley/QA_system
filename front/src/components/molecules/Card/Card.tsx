@@ -1,6 +1,7 @@
 import { HTMLAttributes } from 'react';
 import { cn } from '../../../lib/utils';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {}
 
 export const Card = ({ className, children, ...props }: CardProps) => {

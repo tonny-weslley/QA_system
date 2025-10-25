@@ -8,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../molecules/Card';
 import { Badge } from '../../atoms/Badge';
 import { Button } from '../../atoms/Button';
 import { triggerConfetti } from '../../../lib/utils/confetti';
-import { pageVariants } from '../../../lib/utils/animations';
 
 export const QuestionDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +23,7 @@ export const QuestionDetail = () => {
     if (id) {
       loadQuestion();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const loadQuestion = async () => {
