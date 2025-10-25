@@ -28,7 +28,13 @@ export const QuestionDetail = () => {
 
   const loadQuestion = async () => {
     try {
-      const data = await questionsApi.getById(id!);
+      // Verificar se é um código (5 caracteres alfanuméricos) ou ID
+      const isCode = /^[A-Za-z0-9]{5}$/.test(id!);
+      
+      const data = isCode 
+        ? await questionsApi.getByCode(id!)
+        : await questionsApi.getById(id!);
+      
       setQuestion(data);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Erro ao carregar pergunta');

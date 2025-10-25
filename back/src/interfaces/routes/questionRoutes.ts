@@ -81,6 +81,30 @@ router.get('/', authMiddleware, (req, res) => getQuestionController().list(req, 
 
 /**
  * @swagger
+ * /api/questions/code/{code}:
+ *   get:
+ *     tags: [Questions]
+ *     summary: Get question by code
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: code
+ *         required: true
+ *         schema:
+ *           type: string
+ *           pattern: '^[A-Za-z0-9]{5}$'
+ *         description: 5-character alphanumeric code
+ *     responses:
+ *       200:
+ *         description: Question details
+ *       404:
+ *         description: Question not found
+ */
+router.get('/code/:code', authMiddleware, (req, res) => getQuestionController().getByCode(req, res));
+
+/**
+ * @swagger
  * /api/questions/{id}:
  *   get:
  *     tags: [Questions]
@@ -172,6 +196,112 @@ router.put('/:id', authMiddleware, adminMiddleware, (req, res) =>
  */
 router.delete('/:id', authMiddleware, adminMiddleware, (req, res) =>
   getQuestionController().delete(req, res)
+);
+
+/**
+ * @swagger
+ * /api/questions/{id}/visibility:
+ *   patch:
+ *     tags: [Questions]
+ *     summary: Update question visibility (Admin only)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - visible
+ *             properties:
+ *               visible:
+ *                 type: boolean
+ *                 description: Whether the question should be visible to participants
+ *     responses:
+ *       200:
+ *         description: Visibility updated successfully
+ *       400:
+ *         description: Validation error
+ *       403:
+ *         description: Admin access required
+ *       404:
+ *         description: Question not found
+ */
+router.patch('/:id/visibility', authMiddleware, adminMiddleware, (req, res) =>
+  getQuestionController().updateVisibility(req, res)
+);
+
+/**
+ * @swagger
+ * /api/questions/visibility/all:
+ *   patch:
+ *     tags: [Questions]
+ *     summary: Update visibility for all questions (Admin only)
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - visible
+ *             properties:
+ *               visible:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: All questions visibility updated successfully
+ *       400:
+ *         description: Invalid request
+ */
+router.patch('/visibility/all', authMiddleware, adminMiddleware, (req, res) =>
+  getQuestionController().updateAllVisibility(req, res)
+);
+
+/**
+ * @swagger
+ * /api/questions/{id}/lock:
+ *   patch:
+ *     tags: [Questions]
+ *     summary: Toggle question lock status (Admin only)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - isLocked
+ *             properties:
+ *               isLocked:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Question lock status updated successfully
+ *       400:
+ *         description: Invalid request
+ *       404:
+ *         description: Question not found
+ */
+router.patch('/:id/lock', authMiddleware, adminMiddleware, (req, res) =>
+  getQuestionController().toggleLock(req, res)
 );
 
 export default router;

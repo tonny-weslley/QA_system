@@ -55,7 +55,7 @@ export const AdminDashboard = ({
   return (
     <div className={cn('w-full space-y-6', className)} {...props}>
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm text-gray-400">Total de Perguntas</CardTitle>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { questionsApi } from '../../../lib/api/questions';
-import type { Question } from '../../../lib/api/questions';
+import { questionsApi, type Question } from '../../../lib/api/questions';
+import { downloadQRCode, downloadQRCodesZip } from '../../../lib/utils/qrcode';
 import { useAuth } from '../../../lib/context/AuthContext';
 import { AdminLayout } from '../../templates/AdminLayout';
 import { QuestionCard } from '../../organisms/QuestionCard';
@@ -84,6 +84,36 @@ export const AdminQuestionsPage = () => {
     }
   };
 
+  const handleToggleVisibility = async (id: string, visible: boolean) => {
+    try {
+      await questionsApi.updateVisibility(id, visible);
+      loadQuestions();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Erro ao atualizar visibilidade');
+    }
+  };
+
+  const handleToggleLock = async (id: string, isLocked: boolean) => {
+    try {
+      const response = await fetch(`/api/questions/${id}/lock`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ isLocked })
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao atualizar bloqueio');
+      }
+
+      loadQuestions();
+    } catch (err: any) {
+      alert(err?.message || 'Erro ao atualizar bloqueio');
+    }
+  };
+
   const handleEditClick = (question: Question) => {
     setEditingQuestion(question);
     setShowForm(true);
@@ -92,6 +122,48 @@ export const AdminQuestionsPage = () => {
   const handleCancelForm = () => {
     setShowForm(false);
     setEditingQuestion(null);
+  };
+
+  const handleDownloadQRCode = async (question: Question) => {
+    if (!question.code) {
+      alert('Esta pergunta não possui código QR');
+      return;
+    }
+
+    try {
+      const url = `${window.location.origin}/questions/${question.code}`;
+      const filename = `qrcode-${question.code}-${question.statement.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}`;
+      await downloadQRCode(url, filename);
+    } catch (err) {
+      alert('Erro ao baixar QR Code');
+      console.error(err);
+    }
+  };
+
+  const handleDownloadAllQRCodes = async () => {
+    if (questions.length === 0) {
+      alert('Nenhuma pergunta disponível');
+      return;
+    }
+
+    const questionsWithCode = questions.filter(q => q.code);
+    
+    if (questionsWithCode.length === 0) {
+      alert('Nenhuma pergunta possui código QR');
+      return;
+    }
+
+    try {
+      const items = questionsWithCode.map(q => ({
+        url: `${window.location.origin}/questions/${q.code}`,
+        filename: `qrcode-${q.code}-${q.statement.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}`
+      }));
+
+      await downloadQRCodesZip(items);
+    } catch (err) {
+      alert('Erro ao baixar QR Codes');
+      console.error(err);
+    }
   };
 
   if (!user || user.role !== 'admin') {
@@ -122,22 +194,34 @@ export const AdminQuestionsPage = () => {
     >
       <div className="space-y-6">
         {/* Header com botão de criar */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h2 className="text-2xl font-bold">Gerenciar Perguntas</h2>
             <p className="text-gray-400 text-sm">
               Total: {questions.length} pergunta{questions.length !== 1 ? 's' : ''}
             </p>
           </div>
-          <Button
-            onClick={() => {
-              setEditingQuestion(null);
-              setShowForm(true);
-            }}
-            disabled={showForm}
-          >
-            ➕ Nova Pergunta
-          </Button>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button
+              onClick={handleDownloadAllQRCodes}
+              variant="secondary"
+              disabled={questions.length === 0}
+              className="flex-1 sm:flex-none"
+              title="Baixar todos os QR Codes"
+            >
+              📥 QR Codes
+            </Button>
+            <Button
+              onClick={() => {
+                setEditingQuestion(null);
+                setShowForm(true);
+              }}
+              disabled={showForm}
+              className="flex-1 sm:flex-none"
+            >
+              ➕ Nova Pergunta
+            </Button>
+          </div>
         </div>
 
         {error && (
@@ -193,13 +277,20 @@ export const AdminQuestionsPage = () => {
               <QuestionCard
                 key={question.id}
                 id={question.id}
+                code={question.code}
                 statement={question.statement}
                 difficulty={question.difficulty}
                 isLocked={question.isLocked}
+                visible={question.visible}
                 onEdit={() => handleEditClick(question)}
                 onDelete={() => handleDelete(question.id)}
+                onToggleVisibility={(visible) => handleToggleVisibility(question.id, visible)}
+                onToggleLock={(isLocked) => handleToggleLock(question.id, isLocked)}
+                onDownloadQRCode={() => handleDownloadQRCode(question)}
                 showActions={true}
                 showQRCode={true}
+                showVisibilityToggle={true}
+                showLockToggle={true}
               />
             ))}
           </div>

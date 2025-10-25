@@ -51,8 +51,8 @@ export const Scoreboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-halloween-black via-halloween-purple/10 to-halloween-black">
       <nav className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-creepster text-halloween-gradient">🎃 Halloween Quiz</h1>
-          <Button variant="ghost" onClick={() => navigate('/questions')}>
+          <h1 className="text-xl sm:text-2xl font-creepster text-halloween-gradient">🎃 Halloween Quiz</h1>
+          <Button variant="ghost" onClick={() => navigate('/questions')} size="sm">
             ← Voltar
           </Button>
         </div>
@@ -60,10 +60,10 @@ export const Scoreboard = () => {
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-8 text-center">
-          <h2 className="text-4xl font-creepster text-halloween-gradient mb-2">
+          <h2 className="text-3xl sm:text-4xl font-creepster text-halloween-gradient mb-2">
             🏆 Ranking
           </h2>
-          <p className="text-gray-400">Veja quem está no topo!</p>
+          <p className="text-sm sm:text-base text-gray-400">Veja quem está no topo!</p>
         </div>
 
         <Card>

@@ -2,14 +2,14 @@ import { IQuestionRepository } from '../../domain/interfaces/IQuestionRepository
 import { IAnswerRepository } from '../../domain/interfaces/IAnswerRepository';
 import { QuestionResponse } from '../../domain/entities/Question';
 
-export class GetQuestionById {
+export class GetQuestionByCode {
   constructor(
     private questionRepository: IQuestionRepository,
     private answerRepository: IAnswerRepository
   ) {}
 
-  async execute(questionId: string, userId: string, isAdmin: boolean): Promise<QuestionResponse> {
-    const question = await this.questionRepository.findById(questionId);
+  async execute(code: string, userId: string, isAdmin: boolean): Promise<QuestionResponse> {
+    const question = await this.questionRepository.findByCode(code);
 
     if (!question) {
       throw new Error('Question not found');
@@ -23,7 +23,7 @@ export class GetQuestionById {
       }
 
       // Verificar se já respondeu
-      const userAnswer = await this.answerRepository.findByUserAndQuestion(userId, questionId);
+      const userAnswer = await this.answerRepository.findByUserAndQuestion(userId, question.id);
       if (userAnswer) {
         throw new Error('You have already answered this question');
       }

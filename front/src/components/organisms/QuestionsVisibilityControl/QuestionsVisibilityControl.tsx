@@ -26,11 +26,32 @@ export const QuestionsVisibilityControl = () => {
   const handleToggle = async () => {
     setIsSaving(true);
     try {
-      await configApi.update('questions.visible', !isVisible);
-      setIsVisible(!isVisible);
-      alert(`Visualização de perguntas ${!isVisible ? 'habilitada' : 'desabilitada'} com sucesso!`);
+      const newVisibility = !isVisible;
+      
+      // Atualizar a configuração global
+      await configApi.update('questions.visible', newVisibility);
+      
+      // Atualizar visibilidade de TODAS as perguntas
+      const response = await fetch('/api/questions/visibility/all', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ visible: newVisibility })
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao atualizar perguntas');
+      }
+
+      const result = await response.json();
+      
+      setIsVisible(newVisibility);
+      alert(`Visualização ${newVisibility ? 'habilitada' : 'desabilitada'} com sucesso! ${result.updated} perguntas atualizadas.`);
     } catch (err) {
       alert('Erro ao atualizar configuração');
+      console.error(err);
     } finally {
       setIsSaving(false);
     }
@@ -74,7 +95,7 @@ export const QuestionsVisibilityControl = () => {
             <Button
               onClick={handleToggle}
               isLoading={isSaving}
-              variant={isVisible ? 'danger' : 'default'}
+              variant={isVisible ? 'danger' : 'primary'}
             >
               {isVisible ? 'Desabilitar' : 'Habilitar'}
             </Button>

@@ -1,32 +1,46 @@
-import { HTMLAttributes } from 'react';
+import { type HTMLAttributes } from 'react';
 import { cn } from '../../../lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '../../molecules/Card';
 import { Badge } from '../../atoms/Badge';
 import { Button } from '../../atoms/Button';
-import { QRCodeDisplay } from '../../molecules/QRCodeDisplay';
+import { QRCodeSVG } from 'qrcode.react';
 
 export interface QuestionCardProps extends HTMLAttributes<HTMLDivElement> {
   id: string;
+  code?: string;
   statement: string;
   difficulty: 'easy' | 'medium' | 'hard';
   isLocked?: boolean;
+  visible?: boolean;
   onAnswer?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  onToggleVisibility?: (visible: boolean) => void;
+  onToggleLock?: (isLocked: boolean) => void;
+  onDownloadQRCode?: () => void;
   showActions?: boolean;
   showQRCode?: boolean;
+  showVisibilityToggle?: boolean;
+  showLockToggle?: boolean;
 }
 
 export const QuestionCard: React.FC<QuestionCardProps> = ({
   id,
+  code,
   statement,
   difficulty,
   isLocked = false,
+  visible = true,
   onAnswer,
   onEdit,
   onDelete,
+  onToggleVisibility,
+  onToggleLock,
+  onDownloadQRCode,
   showActions = true,
   showQRCode = false,
+  showVisibilityToggle = false,
+  showLockToggle = false,
   className,
   ...props
 }: QuestionCardProps) => {
@@ -53,17 +67,84 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
       {...props}
     >
       <CardHeader>
-        <div className="flex justify-between items-start mb-2 gap-2">
-          <Badge variant={getDifficultyVariant()}>{difficulty.toUpperCase()}</Badge>
-          {isLocked && <Badge variant="error">🔒 Bloqueada</Badge>}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Badge variant={getDifficultyVariant()}>{difficulty.toUpperCase()}</Badge>
+            {isLocked && <Badge variant="error">🔒 Bloqueada</Badge>}
+            {!visible && <Badge variant="warning">👁️ Invisível</Badge>}
+          </div>
         </div>
-        <CardTitle className="text-lg line-clamp-3">{statement}</CardTitle>
+        <CardTitle className="text-base sm:text-lg line-clamp-3">{statement}</CardTitle>
       </CardHeader>
       <CardContent>
-        {showQRCode && (
-          <div className="mb-4">
-            <QRCodeDisplay value={id} size={150} />
-            <p className="text-xs text-gray-500 text-center mt-2">ID: {id.slice(0, 8)}...</p>
+        {showQRCode && code && (
+          <div className="mb-4 flex flex-col items-center">
+            <div className="bg-white p-3 rounded-lg">
+              <QRCodeSVG 
+                value={`${window.location.origin}/questions/${code}`}
+                size={128}
+                level="M"
+                includeMargin={false}
+              />
+            </div>
+            <p className="text-sm font-mono font-bold text-halloween-purple mt-2">{code}</p>
+            <p className="text-xs text-gray-500 text-center">Escaneie ou digite o código</p>
+          </div>
+        )}
+        {showVisibilityToggle && onToggleVisibility && (
+          <div className="mb-4 p-3 bg-gray-800/50 rounded-md">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">
+                  {visible ? '👁️ Visível' : '🚫 Invisível'}
+                </span>
+                <span className="text-xs text-gray-400">
+                  {visible ? 'Participantes podem ver' : 'Apenas admins'}
+                </span>
+              </div>
+              <button
+                onClick={() => onToggleVisibility(!visible)}
+                className={cn(
+                  'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+                  visible ? 'bg-green-600' : 'bg-gray-600'
+                )}
+              >
+                <span
+                  className={cn(
+                    'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                    visible ? 'translate-x-6' : 'translate-x-1'
+                  )}
+                />
+              </button>
+            </div>
+          </div>
+        )}
+        {showLockToggle && onToggleLock && (
+          <div className="mb-4 p-3 bg-gray-800/50 rounded-md">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">
+                  {isLocked ? '🔒 Bloqueada' : '🔓 Desbloqueada'}
+                </span>
+                <span className="text-xs text-gray-400">
+                  {isLocked ? 'Não pode ser respondida' : 'Pode ser respondida'}
+                </span>
+              </div>
+              <button
+                onClick={() => onToggleLock(!isLocked)}
+                className={cn(
+                  'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+                  isLocked ? 'bg-red-600' : 'bg-green-600'
+                )}
+              >
+                <span
+                  className={cn(
+                    'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                    isLocked ? 'translate-x-6' : 'translate-x-1'
+                  )}
+                />
+              </button>
+            </div>
           </div>
         )}
         {showActions && (
@@ -78,13 +159,18 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
                 {isLocked ? 'Bloqueada' : 'Responder'}
               </Button>
             )}
+            {onDownloadQRCode && (
+              <Button variant="secondary" onClick={onDownloadQRCode} size="sm" title="Baixar QR Code">
+                📥
+              </Button>
+            )}
             {onEdit && (
-              <Button variant="secondary" onClick={onEdit} size="sm">
+              <Button variant="secondary" onClick={onEdit} size="sm" title="Editar">
                 ✏️
               </Button>
             )}
             {onDelete && (
-              <Button variant="danger" onClick={onDelete} size="sm">
+              <Button variant="danger" onClick={onDelete} size="sm" title="Deletar">
                 🗑️
               </Button>
             )}

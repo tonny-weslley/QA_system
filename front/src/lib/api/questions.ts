@@ -8,11 +8,13 @@ export interface QuestionOption {
 
 export interface Question {
   id: string;
+  code: string;
   statement: string;
   options: QuestionOption[];
   difficulty: 'easy' | 'medium' | 'hard';
   qrCodeUrl: string;
   isLocked: boolean;
+  visible: boolean;
   createdAt: string;
 }
 
@@ -33,6 +35,11 @@ export const questionsApi = {
     return response.data;
   },
 
+  getByCode: async (code: string): Promise<Question> => {
+    const response = await apiClient.get(`/questions/code/${code}`);
+    return response.data;
+  },
+
   create: async (data: CreateQuestionData): Promise<Question> => {
     const response = await apiClient.post('/questions', data);
     return response.data;
@@ -45,5 +52,9 @@ export const questionsApi = {
 
   delete: async (id: string): Promise<void> => {
     await apiClient.delete(`/questions/${id}`);
+  },
+
+  updateVisibility: async (id: string, visible: boolean): Promise<void> => {
+    await apiClient.patch(`/questions/${id}/visibility`, { visible });
   },
 };

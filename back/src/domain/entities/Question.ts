@@ -6,11 +6,13 @@ export interface QuestionOption {
 
 export interface Question {
   id: string;
+  code: string;
   statement: string;
   options: QuestionOption[];
   difficulty: 'easy' | 'medium' | 'hard';
   qrCodeUrl: string;
   isLocked: boolean;
+  visible: boolean;
   createdBy: string;
   createdAt: Date;
   updatedAt: Date;
@@ -29,14 +31,18 @@ export interface UpdateQuestionDTO {
   statement?: string;
   options?: Array<{ text: string; isCorrect: boolean }>;
   difficulty?: QuestionDifficulty;
+  visible?: boolean;
+  isLocked?: boolean;
 }
 
 export interface QuestionResponse {
   id: string;
+  code: string;
   statement: string;
   options: Array<{ id: string; text: string; isCorrect?: boolean }>;
   difficulty: QuestionDifficulty;
   qrCodeUrl: string;
   isLocked: boolean;
+  visible: boolean;
   createdAt: Date;
 }

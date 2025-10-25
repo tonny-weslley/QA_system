@@ -3,6 +3,7 @@ import { IQuestionRepository } from '../../../domain/interfaces/IQuestionReposit
 import { Question, CreateQuestionDTO, UpdateQuestionDTO } from '../../../domain/entities/Question';
 import { DatabaseConfig } from '../../../config/database';
 import { v4 as uuidv4 } from 'uuid';
+import { CodeGenerator } from '../../utils/codeGenerator';
 
 export class QuestionRepository implements IQuestionRepository {
   private collection: Collection;
@@ -14,7 +15,24 @@ export class QuestionRepository implements IQuestionRepository {
 
   async create(data: CreateQuestionDTO): Promise<Question> {
     const now = new Date();
+    
+    // Gerar código único
+    let code = CodeGenerator.generate();
+    let attempts = 0;
+    const maxAttempts = 10;
+    
+    // Garantir que o código é único
+    while (await this.codeExists(code) && attempts < maxAttempts) {
+      code = CodeGenerator.generate();
+      attempts++;
+    }
+    
+    if (attempts >= maxAttempts) {
+      throw new Error('Failed to generate unique code after maximum attempts');
+    }
+    
     const question = {
+      code,
       statement: data.statement,
       options: data.options.map((opt) => ({
         id: uuidv4(),
@@ -24,6 +42,7 @@ export class QuestionRepository implements IQuestionRepository {
       difficulty: data.difficulty,
       qrCodeUrl: '', // Will be generated after insertion
       isLocked: false,
+      visible: true, // Pergunta visível por padrão
       createdBy: data.createdBy,
       createdAt: now,
       updatedAt: now,
@@ -45,11 +64,13 @@ export class QuestionRepository implements IQuestionRepository {
 
     return {
       id: question._id.toString(),
+      code: question.code || '',
       statement: question.statement,
       options: question.options,
       difficulty: question.difficulty,
       qrCodeUrl: question.qrCodeUrl || `/question/${question._id.toString()}`,
       isLocked: question.isLocked,
+      visible: question.visible ?? true,
       createdBy: question.createdBy,
       createdAt: question.createdAt,
       updatedAt: question.updatedAt,
@@ -60,11 +81,13 @@ export class QuestionRepository implements IQuestionRepository {
     const questions = await this.collection.find({}).toArray();
     return questions.map((q) => ({
       id: q._id.toString(),
+      code: q.code || '',
       statement: q.statement,
       options: q.options,
       difficulty: q.difficulty,
       qrCodeUrl: q.qrCodeUrl || `/question/${q._id.toString()}`,
       isLocked: q.isLocked,
+      visible: q.visible ?? true,
       createdBy: q.createdBy,
       createdAt: q.createdAt,
       updatedAt: q.updatedAt,
@@ -75,11 +98,36 @@ export class QuestionRepository implements IQuestionRepository {
     const questions = await this.collection.find({ isLocked: false }).toArray();
     return questions.map((q) => ({
       id: q._id.toString(),
+      code: q.code || '',
       statement: q.statement,
       options: q.options,
       difficulty: q.difficulty,
       qrCodeUrl: q.qrCodeUrl || `/question/${q._id.toString()}`,
       isLocked: q.isLocked,
+      visible: q.visible ?? true,
+      createdBy: q.createdBy,
+      createdAt: q.createdAt,
+      updatedAt: q.updatedAt,
+    }));
+  }
+
+  async findVisible(): Promise<Question[]> {
+    // Buscar perguntas onde visible não existe OU visible é true
+    const questions = await this.collection.find({
+      $or: [
+        { visible: { $exists: false } },
+        { visible: true }
+      ]
+    }).toArray();
+    return questions.map((q) => ({
+      id: q._id.toString(),
+      code: q.code || '',
+      statement: q.statement,
+      options: q.options,
+      difficulty: q.difficulty,
+      qrCodeUrl: q.qrCodeUrl || `/question/${q._id.toString()}`,
+      isLocked: q.isLocked,
+      visible: q.visible ?? true,
       createdBy: q.createdBy,
       createdAt: q.createdAt,
       updatedAt: q.updatedAt,
@@ -91,6 +139,8 @@ export class QuestionRepository implements IQuestionRepository {
 
     if (data.statement) updateData.statement = data.statement;
     if (data.difficulty) updateData.difficulty = data.difficulty;
+    if (data.visible !== undefined) updateData.visible = data.visible;
+    if (data.isLocked !== undefined) updateData.isLocked = data.isLocked;
     if (data.options) {
       updateData.options = data.options.map((opt) => ({
         id: uuidv4(),
@@ -109,11 +159,13 @@ export class QuestionRepository implements IQuestionRepository {
 
     return {
       id: result._id.toString(),
+      code: result.code || '',
       statement: result.statement,
       options: result.options,
       difficulty: result.difficulty,
       qrCodeUrl: result.qrCodeUrl || `/question/${result._id.toString()}`,
       isLocked: result.isLocked,
+      visible: result.visible ?? true,
       createdBy: result.createdBy,
       createdAt: result.createdAt,
       updatedAt: result.updatedAt,
@@ -139,5 +191,37 @@ export class QuestionRepository implements IQuestionRepository {
       { $set: { isLocked: false, updatedAt: new Date() } }
     );
     return result.modifiedCount >= 0;
+  }
+
+  async updateVisibility(id: string, visible: boolean): Promise<boolean> {
+    const result = await this.collection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { visible, updatedAt: new Date() } }
+    );
+    return result.modifiedCount > 0;
+  }
+
+  async findByCode(code: string): Promise<Question | null> {
+    const question = await this.collection.findOne({ code });
+    if (!question) return null;
+
+    return {
+      id: question._id.toString(),
+      code: question.code,
+      statement: question.statement,
+      options: question.options,
+      difficulty: question.difficulty,
+      qrCodeUrl: question.qrCodeUrl || `/question/${question._id.toString()}`,
+      isLocked: question.isLocked,
+      visible: question.visible ?? true,
+      createdBy: question.createdBy,
+      createdAt: question.createdAt,
+      updatedAt: question.updatedAt,
+    };
+  }
+
+  async codeExists(code: string): Promise<boolean> {
+    const count = await this.collection.countDocuments({ code });
+    return count > 0;
   }
 }
