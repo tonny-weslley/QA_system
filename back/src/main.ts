@@ -4,10 +4,8 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import { createServer } from 'http';
 import rateLimit from 'express-rate-limit';
 import { DatabaseConfig } from './config/database';
-import { WebSocketServer } from './infra/websocket/WebSocketServer';
 import authRoutes from './interfaces/routes/authRoutes';
 import questionRoutes from './interfaces/routes/questionRoutes';
 import answerRoutes from './interfaces/routes/answerRoutes';
@@ -18,7 +16,6 @@ import adminRoutes from './interfaces/routes/adminRoutes';
 dotenv.config();
 
 const app = express();
-const httpServer = createServer(app);
 const PORT = process.env.PORT || 3000;
 
 // Rate limiting
@@ -92,33 +89,23 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// WebSocket instance (global)
-let wsServer: WebSocketServer;
-
 // Start server
 const startServer = async (): Promise<void> => {
   try {
     // Connect to database
     await DatabaseConfig.connect();
 
-    // Initialize WebSocket
-    wsServer = new WebSocketServer(httpServer);
-
     // Start listening
-    httpServer.listen(PORT, () => {
+    app.listen(PORT, () => {
       console.log(`🎃 Halloween Quiz API running on port ${PORT}`);
       console.log(`📚 Swagger docs available at http://localhost:${PORT}/api-docs`);
       console.log(`❤️  Health check at http://localhost:${PORT}/healthz`);
-      console.log(`🔌 WebSocket server ready`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);
   }
 };
-
-// Export WebSocket server for use in controllers
-export const getWebSocketServer = (): WebSocketServer => wsServer;
 
 // Graceful shutdown
 process.on('SIGINT', async () => {

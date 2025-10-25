@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './lib/context/AuthContext';
-import { WebSocketProvider } from './lib/context/WebSocketContext';
 import { Login } from './components/pages/Login';
 import { Register } from './components/pages/Register';
 import { Questions } from './components/pages/Questions';
@@ -108,9 +107,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <WebSocketProvider>
-          <AppRoutes />
-        </WebSocketProvider>
+        <AppRoutes />
       </AuthProvider>
     </BrowserRouter>
   );
