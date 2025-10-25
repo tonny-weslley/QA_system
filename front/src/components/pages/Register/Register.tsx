@@ -85,9 +85,9 @@ export const Register = () => {
                 {error}
               </div>
             )}
-            
+
             {/* Checkbox secreto para criar admin */}
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 id="admin-checkbox"
@@ -98,8 +98,8 @@ export const Register = () => {
               <label htmlFor="admin-checkbox" className="text-sm text-gray-400 cursor-pointer">
                 Criar como administrador 👑
               </label>
-            </div>
-            
+            </div> */}
+
             <Button type="submit" className="w-full" isLoading={isLoading}>
               Criar Conta
             </Button>
