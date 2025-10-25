@@ -25,7 +25,6 @@ export interface QuestionCardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export const QuestionCard: React.FC<QuestionCardProps> = ({
-  id: _id,
   code,
   statement,
   difficulty,

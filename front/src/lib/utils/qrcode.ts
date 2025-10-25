@@ -1,6 +1,7 @@
 import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
 import QRCode from 'qrcode';
+import { jsPDF } from 'jspdf';
 
 /**
  * Gera QR Code como PNG e retorna como Blob
@@ -112,6 +113,82 @@ export const downloadQRCodesZip = async (
     saveAs(content, 'qrcodes.zip');
   } catch (error) {
     console.error('Error downloading QR Codes ZIP:', error);
+    throw error;
+  }
+};
+
+/**
+ * Baixa múltiplos QR Codes como PDF (15 por página)
+ */
+export const downloadQRCodesPDF = async (
+  items: Array<{ url: string; filename: string; code?: string }>
+) => {
+  try {
+    // Criar PDF em formato A4
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 10;
+    const qrSize = 50; // Tamanho do QR code em mm
+    const cols = 3; // 3 colunas
+    const rows = 5; // 5 linhas = 15 QR codes por página
+    const spacingX = (pageWidth - 2 * margin) / cols;
+    const spacingY = (pageHeight - 2 * margin) / rows;
+
+    let itemsInCurrentPage = 0;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      
+      // Adicionar nova página se necessário
+      if (itemsInCurrentPage === 0 && i > 0) {
+        pdf.addPage();
+      }
+
+      // Calcular posição na grade
+      const col = itemsInCurrentPage % cols;
+      const row = Math.floor(itemsInCurrentPage / cols);
+      
+      const x = margin + col * spacingX + (spacingX - qrSize) / 2;
+      const y = margin + row * spacingY + (spacingY - qrSize - 10) / 2;
+
+      // Gerar QR code como data URL
+      const qrDataUrl = await QRCode.toDataURL(item.url, {
+        width: 300,
+        margin: 1,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+
+      // Adicionar QR code ao PDF
+      pdf.addImage(qrDataUrl, 'PNG', x, y, qrSize, qrSize);
+
+      // Adicionar código abaixo do QR code
+      if (item.code) {
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(item.code, x + qrSize / 2, y + qrSize + 5, { align: 'center' });
+      }
+
+      itemsInCurrentPage++;
+
+      // Resetar contador quando atingir 15 itens
+      if (itemsInCurrentPage >= 15) {
+        itemsInCurrentPage = 0;
+      }
+    }
+
+    // Salvar PDF
+    pdf.save('qrcodes.pdf');
+  } catch (error) {
+    console.error('Error downloading QR Codes PDF:', error);
     throw error;
   }
 };

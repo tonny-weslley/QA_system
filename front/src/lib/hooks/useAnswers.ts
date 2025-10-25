@@ -12,8 +12,9 @@ export const useAnswers = () => {
     try {
       const response = await answersApi.submit(data);
       return response;
-    } catch (err: any) {
-      const errorMsg = err.response?.data?.error || 'Erro ao enviar resposta';
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      const errorMsg = error.response?.data?.error || 'Erro ao enviar resposta';
       setError(errorMsg);
       throw new Error(errorMsg);
     } finally {
@@ -24,8 +25,9 @@ export const useAnswers = () => {
   const getMyAnswers = async () => {
     try {
       return await answersApi.getMyAnswers();
-    } catch (err: any) {
-      throw new Error(err.response?.data?.error || 'Erro ao carregar respostas');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      throw new Error(error.response?.data?.error || 'Erro ao carregar respostas');
     }
   };
 

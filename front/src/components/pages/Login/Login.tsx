@@ -21,8 +21,9 @@ export const Login = () => {
     try {
       await login(username, password);
       navigate('/questions');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao fazer login');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setError(error.response?.data?.error || 'Erro ao fazer login');
     } finally {
       setIsLoading(false);
     }

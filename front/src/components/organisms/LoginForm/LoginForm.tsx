@@ -26,8 +26,9 @@ export const LoginForm = ({ onSubmit, onRegisterClick }: LoginFormProps) => {
     setIsLoading(true);
     try {
       await onSubmit(username, password);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao fazer login');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setError(error.response?.data?.error || 'Erro ao fazer login');
     } finally {
       setIsLoading(false);
     }

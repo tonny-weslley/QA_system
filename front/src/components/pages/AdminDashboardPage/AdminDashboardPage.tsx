@@ -25,8 +25,9 @@ export const AdminDashboardPage = () => {
     try {
       const data = await adminApi.getDashboard();
       setStats(data);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao carregar dashboard');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setError(error.response?.data?.error || 'Erro ao carregar dashboard');
     } finally {
       setIsLoading(false);
     }
@@ -37,8 +38,9 @@ export const AdminDashboardPage = () => {
       await adminApi.resetQuestions();
       alert('Perguntas desbloqueadas com sucesso!');
       loadDashboard();
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Erro ao desbloquear perguntas');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      alert(error.response?.data?.error || 'Erro ao desbloquear perguntas');
     }
   };
 
@@ -47,8 +49,9 @@ export const AdminDashboardPage = () => {
       await adminApi.resetScores();
       alert('Pontuações zeradas com sucesso!');
       loadDashboard();
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Erro ao zerar pontuações');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      alert(error.response?.data?.error || 'Erro ao zerar pontuações');
     }
   };
 
@@ -57,8 +60,9 @@ export const AdminDashboardPage = () => {
       await adminApi.finalizeEvent();
       alert('Evento finalizado com sucesso!');
       navigate('/podium');
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Erro ao finalizar evento');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      alert(error.response?.data?.error || 'Erro ao finalizar evento');
     }
   };
 

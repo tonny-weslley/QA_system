@@ -40,8 +40,9 @@ export const Questions = () => {
       // Sempre carregar perguntas (backend filtra automaticamente)
       const questionsData = await questionsApi.getAll();
       setQuestions(questionsData);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao carregar dados');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setError(error.response?.data?.error || 'Erro ao carregar dados');
     } finally {
       setIsLoading(false);
     }
@@ -51,8 +52,9 @@ export const Questions = () => {
     try {
       // Redirecionar para a pergunta usando o código
       navigate(`/questions/${code}`);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Código inválido');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setError(error.response?.data?.error || 'Código inválido');
     }
   };
 

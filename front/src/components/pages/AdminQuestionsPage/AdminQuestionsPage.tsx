@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { questionsApi, type Question } from '../../../lib/api/questions';
-import { downloadQRCode, downloadQRCodesZip } from '../../../lib/utils/qrcode';
+import { downloadQRCode, downloadQRCodesZip, downloadQRCodesPDF } from '../../../lib/utils/qrcode';
 import { useAuth } from '../../../lib/context/AuthContext';
 import { AdminLayout } from '../../templates/AdminLayout';
 import { QuestionCard } from '../../organisms/QuestionCard';
@@ -28,8 +28,9 @@ export const AdminQuestionsPage = () => {
     try {
       const data = await questionsApi.getAll();
       setQuestions(data);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao carregar perguntas');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setError(error.response?.data?.error || 'Erro ao carregar perguntas');
     } finally {
       setIsLoading(false);
     }
@@ -46,8 +47,9 @@ export const AdminQuestionsPage = () => {
       setShowForm(false);
       loadQuestions();
       alert('Pergunta criada com sucesso!');
-    } catch (err: any) {
-      throw new Error(err.response?.data?.error || 'Erro ao criar pergunta');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      throw new Error(error.response?.data?.error || 'Erro ao criar pergunta');
     }
   };
 
@@ -65,8 +67,9 @@ export const AdminQuestionsPage = () => {
       setShowForm(false);
       loadQuestions();
       alert('Pergunta atualizada com sucesso!');
-    } catch (err: any) {
-      throw new Error(err.response?.data?.error || 'Erro ao atualizar pergunta');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      throw new Error(error.response?.data?.error || 'Erro ao atualizar pergunta');
     }
   };
 
@@ -79,8 +82,9 @@ export const AdminQuestionsPage = () => {
       await questionsApi.delete(id);
       loadQuestions();
       alert('Pergunta deletada com sucesso!');
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Erro ao deletar pergunta');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      alert(error.response?.data?.error || 'Erro ao deletar pergunta');
     }
   };
 
@@ -88,8 +92,9 @@ export const AdminQuestionsPage = () => {
     try {
       await questionsApi.updateVisibility(id, visible);
       loadQuestions();
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Erro ao atualizar visibilidade');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      alert(error.response?.data?.error || 'Erro ao atualizar visibilidade');
     }
   };
 
@@ -109,8 +114,9 @@ export const AdminQuestionsPage = () => {
       }
 
       loadQuestions();
-    } catch (err: any) {
-      alert(err?.message || 'Erro ao atualizar bloqueio');
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      alert(error?.message || 'Erro ao atualizar bloqueio');
     }
   };
 
@@ -167,6 +173,33 @@ export const AdminQuestionsPage = () => {
     }
   };
 
+  const handleDownloadAllQRCodesPDF = async () => {
+    if (questions.length === 0) {
+      alert('Nenhuma pergunta disponível');
+      return;
+    }
+
+    const questionsWithCode = questions.filter(q => q.code);
+    
+    if (questionsWithCode.length === 0) {
+      alert('Nenhuma pergunta possui código QR');
+      return;
+    }
+
+    try {
+      const items = questionsWithCode.map(q => ({
+        url: `${window.location.origin}/questions/${q.code}`,
+        filename: `qrcode-${q.code}-${q.statement.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}`,
+        code: q.code
+      }));
+
+      await downloadQRCodesPDF(items);
+    } catch (err) {
+      alert('Erro ao baixar QR Codes PDF');
+      console.error(err);
+    }
+  };
+
   if (!user || user.role !== 'admin') {
     navigate('/questions');
     return null;
@@ -208,9 +241,18 @@ export const AdminQuestionsPage = () => {
               variant="secondary"
               disabled={questions.length === 0}
               className="flex-1 sm:flex-none"
-              title="Baixar todos os QR Codes"
+              title="Baixar todos os QR Codes em ZIP"
             >
-              📥 QR Codes
+              📥 ZIP
+            </Button>
+            <Button
+              onClick={handleDownloadAllQRCodesPDF}
+              variant="secondary"
+              disabled={questions.length === 0}
+              className="flex-1 sm:flex-none"
+              title="Baixar todos os QR Codes em PDF (15 por página)"
+            >
+              📄 PDF
             </Button>
             <Button
               onClick={() => {

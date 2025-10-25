@@ -134,7 +134,7 @@ export const AdminDashboard = ({
                   <div className="flex items-start justify-between gap-2">
                     <p className="flex-1 line-clamp-2">{question.statement}</p>
                     <div className="flex gap-2">
-                      <Badge variant={question.difficulty as any}>
+                      <Badge variant={question.difficulty as 'easy' | 'medium' | 'hard'}>
                         {question.difficulty.toUpperCase()}
                       </Badge>
                       {question.isLocked && <Badge variant="error">🔒</Badge>}

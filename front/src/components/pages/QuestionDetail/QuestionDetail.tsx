@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { questionsApi } from '../../../lib/api/questions';
 import type { Question } from '../../../lib/api/questions';
 import { answersApi } from '../../../lib/api/answers';
+import type { AnswerResponse } from '../../../lib/api/answers';
 import { Card, CardContent, CardHeader, CardTitle } from '../../molecules/Card';
 import { Badge } from '../../atoms/Badge';
 import { Button } from '../../atoms/Button';
@@ -15,7 +16,7 @@ export const QuestionDetail = () => {
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<AnswerResponse | null>(null);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -36,8 +37,9 @@ export const QuestionDetail = () => {
         : await questionsApi.getById(id!);
       
       setQuestion(data);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao carregar pergunta');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setError(error.response?.data?.error || 'Erro ao carregar pergunta');
     } finally {
       setIsLoading(false);
     }
@@ -63,8 +65,9 @@ export const QuestionDetail = () => {
       if (response.isCorrect) {
         triggerConfetti();
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao enviar resposta');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setError(error.response?.data?.error || 'Erro ao enviar resposta');
       setIsSubmitting(false);
     }
   };
@@ -144,7 +147,7 @@ export const QuestionDetail = () => {
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center mb-4">
-              <Badge variant={question.difficulty as any}>
+              <Badge variant={question.difficulty}>
                 {question.difficulty.toUpperCase()}
               </Badge>
             </div>

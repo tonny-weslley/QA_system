@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { questionsApi } from '../api/questions';
-import type { Question } from '../api/questions';
+import type { Question, CreateQuestionData } from '../api/questions';
 
 export const useQuestions = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -13,8 +13,9 @@ export const useQuestions = () => {
     try {
       const data = await questionsApi.getAll();
       setQuestions(data);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao carregar perguntas');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setError(error.response?.data?.error || 'Erro ao carregar perguntas');
     } finally {
       setIsLoading(false);
     }
@@ -23,28 +24,31 @@ export const useQuestions = () => {
   const getQuestion = async (id: string) => {
     try {
       return await questionsApi.getById(id);
-    } catch (err: any) {
-      throw new Error(err.response?.data?.error || 'Erro ao carregar pergunta');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      throw new Error(error.response?.data?.error || 'Erro ao carregar pergunta');
     }
   };
 
-  const createQuestion = async (data: any) => {
+  const createQuestion = async (data: CreateQuestionData) => {
     try {
       const newQuestion = await questionsApi.create(data);
       setQuestions([...questions, newQuestion]);
       return newQuestion;
-    } catch (err: any) {
-      throw new Error(err.response?.data?.error || 'Erro ao criar pergunta');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      throw new Error(error.response?.data?.error || 'Erro ao criar pergunta');
     }
   };
 
-  const updateQuestion = async (id: string, data: any) => {
+  const updateQuestion = async (id: string, data: Partial<CreateQuestionData>) => {
     try {
       const updated = await questionsApi.update(id, data);
       setQuestions(questions.map((q) => (q.id === id ? updated : q)));
       return updated;
-    } catch (err: any) {
-      throw new Error(err.response?.data?.error || 'Erro ao atualizar pergunta');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      throw new Error(error.response?.data?.error || 'Erro ao atualizar pergunta');
     }
   };
 
@@ -52,8 +56,9 @@ export const useQuestions = () => {
     try {
       await questionsApi.delete(id);
       setQuestions(questions.filter((q) => q.id !== id));
-    } catch (err: any) {
-      throw new Error(err.response?.data?.error || 'Erro ao deletar pergunta');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      throw new Error(error.response?.data?.error || 'Erro ao deletar pergunta');
     }
   };
 

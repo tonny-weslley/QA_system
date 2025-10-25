@@ -88,8 +88,9 @@ export const QuestionForm = ({
     setIsLoading(true);
     try {
       await onSubmit({ statement, options, difficulty });
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao salvar pergunta');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setError(error.response?.data?.error || 'Erro ao salvar pergunta');
     } finally {
       setIsLoading(false);
     }
@@ -115,7 +116,7 @@ export const QuestionForm = ({
             <label className="text-sm font-medium text-gray-200">Dificuldade</label>
             <select
               value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value as any)}
+              onChange={(e) => setDifficulty(e.target.value as 'easy' | 'medium' | 'hard')}
               className="w-full h-10 rounded-md border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-halloween-purple"
             >
               <option value="easy">Fácil (10 pontos)</option>

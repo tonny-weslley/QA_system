@@ -14,8 +14,9 @@ export const useScoreboard = () => {
     try {
       const data = await scoresApi.getScoreboard();
       setScoreboard(data);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao carregar scoreboard');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setError(error.response?.data?.error || 'Erro ao carregar scoreboard');
     } finally {
       setIsLoading(false);
     }
@@ -25,7 +26,7 @@ export const useScoreboard = () => {
     try {
       const data = await scoresApi.getMyScore();
       setMyScore(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Erro ao carregar meu score:', err);
     }
   };

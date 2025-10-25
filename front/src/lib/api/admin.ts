@@ -38,7 +38,7 @@ export const adminApi = {
     return response.data;
   },
 
-  finalizeEvent: async (): Promise<any> => {
+  finalizeEvent: async (): Promise<{ message: string }> => {
     const response = await apiClient.post('/admin/finalize-event');
     return response.data;
   },

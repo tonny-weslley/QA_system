@@ -42,8 +42,9 @@ export const RegisterForm = ({ onSubmit, onLoginClick }: RegisterFormProps) => {
     setIsLoading(true);
     try {
       await onSubmit(username, password);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Erro ao criar conta');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      setError(error.response?.data?.error || 'Erro ao criar conta');
     } finally {
       setIsLoading(false);
     }

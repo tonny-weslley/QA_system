@@ -116,6 +116,6 @@ export const shouldReduceMotion = () => {
 };
 
 // Safe animation wrapper
-export const safeAnimation = (animation: any) => {
+export const safeAnimation = (animation: Record<string, unknown>) => {
   return shouldReduceMotion() ? {} : animation;
 };
