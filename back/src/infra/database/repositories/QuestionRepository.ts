@@ -42,7 +42,7 @@ export class QuestionRepository implements IQuestionRepository {
       difficulty: data.difficulty,
       qrCodeUrl: '', // Will be generated after insertion
       isLocked: false,
-      visible: true, // Pergunta visível por padrão
+      visible: false, // Pergunta invisível por padrão
       createdBy: data.createdBy,
       createdAt: now,
       updatedAt: now,

@@ -5,15 +5,15 @@ import QRCode from 'qrcode';
 /**
  * Gera QR Code como PNG e retorna como Blob
  */
-export const generateQRCodePNG = (url: string, size: number = 256): Promise<Blob> => {
+export const generateQRCodePNG = (url: string, code?: string, size: number = 256): Promise<Blob> => {
   return new Promise((resolve, reject) => {
-    // Criar canvas temporário
-    const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
+    // Criar canvas temporário para o QR code
+    const qrCanvas = document.createElement('canvas');
+    qrCanvas.width = size;
+    qrCanvas.height = size;
 
     // Gerar QR Code no canvas
-    QRCode.toCanvas(canvas, url, {
+    QRCode.toCanvas(qrCanvas, url, {
       width: size,
       margin: 2,
       color: {
@@ -26,7 +26,42 @@ export const generateQRCodePNG = (url: string, size: number = 256): Promise<Blob
         return;
       }
 
-      canvas.toBlob((blob) => {
+      // Criar canvas final com espaço para o código
+      const finalCanvas = document.createElement('canvas');
+      const textHeight = code ? 60 : 0; // Espaço para o texto do código
+      finalCanvas.width = size;
+      finalCanvas.height = size + textHeight;
+
+      const ctx = finalCanvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Failed to get canvas context'));
+        return;
+      }
+
+      // Fundo branco
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+      // Desenhar QR code
+      ctx.drawImage(qrCanvas, 0, 0);
+
+      // Adicionar código abaixo do QR code
+      if (code) {
+        ctx.fillStyle = '#000000';
+        ctx.font = 'bold 24px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Texto "Código:"
+        ctx.font = '16px sans-serif';
+        ctx.fillText('Código:', size / 2, size + 20);
+        
+        // Código da pergunta
+        ctx.font = 'bold 24px monospace';
+        ctx.fillText(code, size / 2, size + 45);
+      }
+
+      finalCanvas.toBlob((blob) => {
         if (blob) {
           resolve(blob);
         } else {
@@ -40,9 +75,9 @@ export const generateQRCodePNG = (url: string, size: number = 256): Promise<Blob
 /**
  * Baixa QR Code individual como PNG
  */
-export const downloadQRCode = async (url: string, filename: string) => {
+export const downloadQRCode = async (url: string, filename: string, code?: string) => {
   try {
-    const blob = await generateQRCodePNG(url, 512);
+    const blob = await generateQRCodePNG(url, code, 512);
     saveAs(blob, `${filename}.png`);
   } catch (error) {
     console.error('Error downloading QR Code:', error);
@@ -54,7 +89,7 @@ export const downloadQRCode = async (url: string, filename: string) => {
  * Baixa múltiplos QR Codes como ZIP
  */
 export const downloadQRCodesZip = async (
-  items: Array<{ url: string; filename: string }>
+  items: Array<{ url: string; filename: string; code?: string }>
 ) => {
   try {
     const zip = new JSZip();
@@ -66,7 +101,7 @@ export const downloadQRCodesZip = async (
 
     // Gerar todos os QR Codes
     const promises = items.map(async (item) => {
-      const blob = await generateQRCodePNG(item.url, 512);
+      const blob = await generateQRCodePNG(item.url, item.code, 512);
       folder.file(`${item.filename}.png`, blob);
     });
 

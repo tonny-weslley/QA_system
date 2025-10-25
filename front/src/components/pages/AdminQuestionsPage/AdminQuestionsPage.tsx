@@ -133,7 +133,7 @@ export const AdminQuestionsPage = () => {
     try {
       const url = `${window.location.origin}/questions/${question.code}`;
       const filename = `qrcode-${question.code}-${question.statement.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}`;
-      await downloadQRCode(url, filename);
+      await downloadQRCode(url, filename, question.code);
     } catch (err) {
       alert('Erro ao baixar QR Code');
       console.error(err);
@@ -156,7 +156,8 @@ export const AdminQuestionsPage = () => {
     try {
       const items = questionsWithCode.map(q => ({
         url: `${window.location.origin}/questions/${q.code}`,
-        filename: `qrcode-${q.code}-${q.statement.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}`
+        filename: `qrcode-${q.code}-${q.statement.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}`,
+        code: q.code
       }));
 
       await downloadQRCodesZip(items);
