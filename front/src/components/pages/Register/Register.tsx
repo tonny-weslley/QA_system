@@ -11,7 +11,6 @@ export const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -32,7 +31,7 @@ export const Register = () => {
     setIsLoading(true);
 
     try {
-      await register(username, password, isAdmin ? 'admin' : 'participant');
+      await register(username, password, 'participant');
       navigate('/questions');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Erro ao criar conta');
@@ -85,20 +84,6 @@ export const Register = () => {
                 {error}
               </div>
             )}
-
-            {/* Checkbox secreto para criar admin */}
-            {/* <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="admin-checkbox"
-                checked={isAdmin}
-                onChange={(e) => setIsAdmin(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-700 bg-gray-900 text-halloween-purple focus:ring-halloween-purple"
-              />
-              <label htmlFor="admin-checkbox" className="text-sm text-gray-400 cursor-pointer">
-                Criar como administrador 👑
-              </label>
-            </div> */}
 
             <Button type="submit" className="w-full" isLoading={isLoading}>
               Criar Conta
