@@ -27,10 +27,17 @@ const limiter = rateLimit({
 
 // Middlewares
 app.use(helmet());
+
+// CORS configuration - allow all origins
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: true, // Allow all origins
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 86400, // 24 hours
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/api/', limiter);
