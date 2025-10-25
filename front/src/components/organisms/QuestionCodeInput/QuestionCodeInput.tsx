@@ -1,5 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
-import { Html5Qrcode } from 'html5-qrcode';
+import { useState } from 'react';
 import { Button } from '../../atoms/Button';
 import { Card, CardContent } from '../../molecules/Card';
 
@@ -9,19 +8,7 @@ interface QuestionCodeInputProps {
 
 export const QuestionCodeInput: React.FC<QuestionCodeInputProps> = ({ onCodeSubmit }) => {
   const [code, setCode] = useState('');
-  const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState('');
-  const scannerRef = useRef<Html5Qrcode | null>(null);
-  const readerIdRef = useRef('qr-reader-' + Math.random().toString(36).substr(2, 9));
-
-  useEffect(() => {
-    return () => {
-      // Cleanup scanner on unmount
-      if (scannerRef.current && isScanning) {
-        scannerRef.current.stop().catch(console.error);
-      }
-    };
-  }, [isScanning]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,52 +16,6 @@ export const QuestionCodeInput: React.FC<QuestionCodeInputProps> = ({ onCodeSubm
       onCodeSubmit(code.trim());
     } else {
       setError('O código deve ter 5 caracteres');
-    }
-  };
-
-  const startScanner = async () => {
-    try {
-      setError('');
-      const html5QrCode = new Html5Qrcode(readerIdRef.current);
-      scannerRef.current = html5QrCode;
-
-      await html5QrCode.start(
-        { facingMode: 'environment' },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-        },
-        (decodedText) => {
-          // Extract code from URL or use directly
-          const match = decodedText.match(/\/questions\/([A-Za-z0-9]{5})$/);
-          const extractedCode = match ? match[1] : decodedText;
-
-          if (/^[A-Za-z0-9]{5}$/.test(extractedCode)) {
-            stopScanner();
-            onCodeSubmit(extractedCode);
-          }
-        },
-        () => {
-          // Ignore scan errors
-        }
-      );
-
-      setIsScanning(true);
-    } catch (err) {
-      setError('Erro ao acessar câmera. Verifique as permissões.');
-      console.error(err);
-    }
-  };
-
-  const stopScanner = () => {
-    if (scannerRef.current) {
-      scannerRef.current
-        .stop()
-        .then(() => {
-          setIsScanning(false);
-          scannerRef.current = null;
-        })
-        .catch(console.error);
     }
   };
 
@@ -89,7 +30,7 @@ export const QuestionCodeInput: React.FC<QuestionCodeInputProps> = ({ onCodeSubm
               type="text"
               value={code}
               onChange={(e) => {
-                setCode(e.target.value.toUpperCase());
+                setCode(e.target.value);
                 setError('');
               }}
               placeholder="Digite o código (5 caracteres)"
@@ -101,41 +42,7 @@ export const QuestionCodeInput: React.FC<QuestionCodeInputProps> = ({ onCodeSubm
             </Button>
           </div>
 
-          {error && (
-            <p className="text-error text-sm text-center">{error}</p>
-          )}
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-700"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-gray-900 text-gray-400">ou</span>
-            </div>
-          </div>
-
-          {!isScanning ? (
-            <Button
-              type="button"
-              onClick={startScanner}
-              variant="secondary"
-              className="w-full"
-            >
-              📷 Escanear QR Code
-            </Button>
-          ) : (
-            <>
-              <div id={readerIdRef.current} className="rounded-lg overflow-hidden"></div>
-              <Button
-                type="button"
-                onClick={stopScanner}
-                variant="danger"
-                className="w-full"
-              >
-                ❌ Cancelar Scanner
-              </Button>
-            </>
-          )}
+          {error && <p className="text-error text-sm text-center">{error}</p>}
         </form>
       </CardContent>
     </Card>
