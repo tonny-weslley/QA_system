@@ -29,6 +29,7 @@ export class UpdateQuestion {
 
     return {
       id: question.id,
+      code: question.code,
       statement: question.statement,
       options: question.options.map((opt) => ({
         id: opt.id,
@@ -38,6 +39,7 @@ export class UpdateQuestion {
       difficulty: question.difficulty,
       qrCodeUrl: question.qrCodeUrl,
       isLocked: question.isLocked,
+      visible: question.visible,
       createdAt: question.createdAt,
     };
   }

@@ -1,5 +1,4 @@
 import { IConfigRepository } from '../../domain/interfaces/IConfigRepository';
-import { Config } from '../../domain/entities/Config';
 
 export class GetAllConfigs {
   constructor(private configRepository: IConfigRepository) {}

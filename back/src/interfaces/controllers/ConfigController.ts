@@ -45,7 +45,7 @@ export class ConfigController {
     }
   }
 
-  async getAll(req: Request, res: Response): Promise<void> {
+  async getAll(_req: Request, res: Response): Promise<void> {
     try {
       const configs = await this.getAllConfigs.execute();
       res.status(200).json(configs);

@@ -1,4 +1,4 @@
-import { Collection, Db, ObjectId } from 'mongodb';
+import { Collection, Db } from 'mongodb';
 import { Config, ConfigEntity } from '../../../domain/entities/Config';
 import { IConfigRepository } from '../../../domain/interfaces/IConfigRepository';
 
@@ -35,6 +35,10 @@ export class ConfigRepository implements IConfigRepository {
         returnDocument: 'after',
       }
     );
+
+    if (!result) {
+      throw new Error('Failed to upsert config');
+    }
 
     return new ConfigEntity(
       result._id.toString(),

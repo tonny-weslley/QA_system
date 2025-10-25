@@ -28,6 +28,7 @@ export class CreateQuestion {
 
     return {
       id: question.id,
+      code: question.code,
       statement: question.statement,
       options: question.options.map((opt) => ({
         id: opt.id,
@@ -37,6 +38,7 @@ export class CreateQuestion {
       difficulty: question.difficulty,
       qrCodeUrl: qrCodeDataUrl,
       isLocked: question.isLocked,
+      visible: question.visible,
       createdAt: question.createdAt,
     };
   }

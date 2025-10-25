@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { ConfigController } from '../controllers/ConfigController';
-import { authMiddleware } from '../middlewares/authMiddleware';
-import { adminMiddleware } from '../middlewares/adminMiddleware';
+import { authMiddleware, adminMiddleware } from '../middlewares/authMiddleware';
 
 export const createConfigRoutes = (
   configController: ConfigController

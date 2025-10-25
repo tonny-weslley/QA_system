@@ -32,7 +32,7 @@ export class AdminController {
     );
   }
 
-  async resetQuestionsHandler(req: AuthRequest, res: Response): Promise<void> {
+  async resetQuestionsHandler(_req: AuthRequest, res: Response): Promise<void> {
     try {
       const result = await this.resetQuestions.execute();
       res.status(200).json(result);
@@ -45,7 +45,7 @@ export class AdminController {
     }
   }
 
-  async resetScoresHandler(req: AuthRequest, res: Response): Promise<void> {
+  async resetScoresHandler(_req: AuthRequest, res: Response): Promise<void> {
     try {
       const result = await this.resetScores.execute();
       res.status(200).json(result);
@@ -58,7 +58,7 @@ export class AdminController {
     }
   }
 
-  async finalizeEventHandler(req: AuthRequest, res: Response): Promise<void> {
+  async finalizeEventHandler(_req: AuthRequest, res: Response): Promise<void> {
     try {
       const result = await this.finalizeEvent.execute();
       res.status(200).json(result);
@@ -71,7 +71,7 @@ export class AdminController {
     }
   }
 
-  async dashboardHandler(req: AuthRequest, res: Response): Promise<void> {
+  async dashboardHandler(_req: AuthRequest, res: Response): Promise<void> {
     try {
       const result = await this.getDashboard.execute();
       res.status(200).json(result);

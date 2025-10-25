@@ -10,7 +10,7 @@ export interface JWTPayload {
 export class JWTService {
   static generateToken(payload: JWTPayload): string {
     return jwt.sign(payload, jwtConfig.secret, {
-      expiresIn: jwtConfig.expiresIn,
+      expiresIn: '24h',
     });
   }
 
